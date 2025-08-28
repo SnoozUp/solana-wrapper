@@ -1,0 +1,563 @@
+{
+  "version": "0.1.0",
+  "name": "snzup_subscription",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "challengeId",
+          "type": "u64"
+        },
+        {
+          "name": "fee",
+          "type": "u64"
+        },
+        {
+          "name": "commission",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "subscribe",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "subscriber",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "setWinnersList",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "winners",
+          "type": {
+            "vec": "publicKey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "sendBonusToWinners",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "treasuryWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "snoozupWallet",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "refundBatch",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "subscribers",
+          "type": {
+            "vec": "publicKey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdrawFunds",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "setFee",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "fee",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getOperationFee",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "setCommision",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "commissionPercentage",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "setOwner",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newOwner",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "removeOwner",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "user",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "setStatus",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "status",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "cancelSubscription",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "subscriber",
+          "type": "publicKey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "state",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "challengeId",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "commission",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "opCounter",
+            "type": "u64"
+          },
+          {
+            "name": "owners",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "subscribers",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "winnersList",
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "SubscriptionEvent",
+      "fields": [
+        {
+          "name": "subscriber",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "challengeId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "fee",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CommisionAndBonusCalculation",
+      "fields": [
+        {
+          "name": "challengeId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "balance",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "commission",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RefundEvent",
+      "fields": [
+        {
+          "name": "subscriber",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "challengeId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "WithdrawEvent",
+      "fields": [
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "challengeId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "OwnershipTransferred",
+      "fields": [
+        {
+          "name": "previousOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newOwner",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "OwnerRemoved",
+      "fields": [
+        {
+          "name": "removedOwner",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "StatusChanged",
+      "fields": [
+        {
+          "name": "challengeId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "newStatus",
+          "type": "u8",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "SubscriptionCancelled",
+      "fields": [
+        {
+          "name": "subscriber",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "challengeId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "refundAmount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance"
+    },
+    {
+      "code": 6001,
+      "name": "AlreadySubscribed",
+      "msg": "Already subscribed"
+    },
+    {
+      "code": 6002,
+      "name": "NotSubscribed",
+      "msg": "Not subscribed"
+    },
+    {
+      "code": 6003,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidStatus",
+      "msg": "Invalid status"
+    },
+    {
+      "code": 6005,
+      "name": "NoWinners",
+      "msg": "No winners set"
+    },
+    {
+      "code": 6006,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6007,
+      "name": "OnlyOwner",
+      "msg": "Only owner"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidCommission",
+      "msg": "Invalid commission"
+    },
+    {
+      "code": 6009,
+      "name": "TreasuryMismatch",
+      "msg": "Treasury wallet mismatch"
+    }
+  ],
+  "metadata": {
+    "address": "FcACxYJJRhnYa2BBqiB6s1bbaRXtRcn3BNZ6jy3rqC1Z"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "simple-solana-wrapper-minimal",
+  "version": "1.0.0",
+  "description": "Minimal Solana wrapper - slim signer + router with 1:1 Solidity parity",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "start:prod": "node dist/main.js",
+    "start:dev": "nest start --watch"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.29.0",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/platform-express": "^11.1.6",
+    "@solana/spl-token": "0.4.8",
+    "@solana/web3.js": "1.95.0",
+    "axios": "^1.11.0",
+    "bn.js": "^5.2.1",
+    "dotenv": "^16.3.1",
+    "helmet": "^7.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.10",
+    "@types/bn.js": "^5.2.0",
+    "@types/express": "^5.0.3",
+    "@types/node": "^20.19.11",
+    "typescript": "^5.9.2"
+  },
+  "keywords": [
+    "solana",
+    "blockchain",
+    "wrapper",
+    "api",
+    "minimal"
+  ],
+  "author": "SNZUP Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "overrides": {
+    "bigint-buffer": "^1.1.5"
+  }
+}
+

@@ -1,0 +1,35 @@
+[workspace]
+members = ["programs/snzup_subscription"]
+resolver = "2"
+
+[workspace.dependencies]
+# align with your installed CLI (example: 1.18.16)
+solana-program = { version = "1.18.16", default-features = false }
+solana-sdk     = { version = "1.18.16", default-features = false }
+# keep only if you actually run Rust program-test locally; otherwise comment it out
+# solana-program-test = { version = "1.18.16", default-features = false }
+
+anchor-lang = "0.29.0"
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+overflow-checks = true
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1
+
+[profile.dev]
+opt-level = "z"
+overflow-checks = true
+debug = true
+
+[profile.test]
+opt-level = "z"
+overflow-checks = true
+debug = true

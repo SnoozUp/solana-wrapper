@@ -1,0 +1,38 @@
+[package]
+name = "snzup_subscription"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+publish = false
+
+[lib]
+name = "snzup_subscription"
+crate-type = ["cdylib", "lib"]
+test = false
+
+[dependencies]
+anchor-lang = "0.29.0"
+solana-program = { version = "1.18.16", default-features = false }
+
+[dev-dependencies]
+
+[profile.release]
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+overflow-checks = true
+
+[features]
+default = []
+
+idl-build = ["anchor-lang/idl-build"]
+
+no-entrypoint = []       
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+anchor-debug = []
+custom-panic = []
+custom-heap = []
+benchmark = []

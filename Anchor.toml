@@ -1,0 +1,28 @@
+[features]
+seeds = false
+skip-lint = false
+
+[build]
+idl-build = true
+
+[programs.localnet]
+snzup_subscription = "FcACxYJJRhnYa2BBqiB6s1bbaRXtRcn3BNZ6jy3rqC1Z"
+
+[programs.devnet]
+snzup_subscription = "AKMoTiFexNvW3efoiwDcemdraDrnhzfBqTeTL21fVRB9"
+
+[programs.mainnet-beta]
+snzup_subscription = "AKMoTiFexNvW3efoiwDcemdraDrnhzfBqTeTL21fVRB9"
+
+[workspace]
+members = [
+    "programs/snzup_subscription"
+]
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = update with Snzup Wallet
+
