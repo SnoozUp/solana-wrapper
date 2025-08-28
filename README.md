@@ -107,13 +107,13 @@ programs/
 
 3. Test user subscription flow:
    ```bash
-   # S1: Backend calls build/subscribe-tx
+   #  S1: Backend calls build/subscribe-tx
    curl -X POST http://localhost:3001/api/build/subscribe-tx \
      -H "Content-Type: application/json" \
      -d '{"subscriber": "USER_WALLET_PUBKEY"}'
    
-   # S2: Client signs the returned txBase64 with wallet and submits via sendTransaction
-   # S3: Check subscriber was added
+   #  S2: Client signs the returned txBase64 with wallet and submits via sendTransaction
+   #  S3: Check subscriber was added
    curl http://localhost:3001/api/state | jq '.subscribers'
    ```
 
