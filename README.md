@@ -69,7 +69,7 @@ programs/
 - `GET /api/challenge-id` - current challenge ID
 - `GET /api/winners` - winners list
 - `GET /api/events/:signature` - get events by transaction signature
-- `GET /api/op-counter` - operation counter
+- `GET /api/operation fee` - operation counter
 - `GET /health` - health check (no /api prefix)
 - `GET /ready` - readiness check (no /api prefix)
 
