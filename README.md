@@ -245,7 +245,7 @@ solana-keygen new --outfile ~/.config/solana/backend-service.json
 cat ~/.config/solana/backend-service.json
 
 
-#Deploy Wrapper
+# Deploy Wrapper
 
 ### 1.1 Clone Repository
 ```bash
