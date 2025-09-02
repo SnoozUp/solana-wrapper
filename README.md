@@ -243,3 +243,62 @@ Create wallet:
 ```bash
 solana-keygen new --outfile ~/.config/solana/backend-service.json
 cat ~/.config/solana/backend-service.json
+
+
+#Deploy Wrapper
+
+### 1.1 Clone Repository
+```bash
+git clone <your-repo-url>
+cd solanascfinal
+```
+
+### 1.2 Install Dependencies
+```bash
+npm install
+```
+
+### 1.3 Create Service Wallet
+```bash
+# Generate new keypair for the wrapper service
+solana-keygen new --outfile service-wallet.json
+
+# View the secret key array
+cat service-wallet.json
+```
+
+### 1.4 Configure Environment
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your values:
+nano .env
+```
+
+Required values in `.env`:
+```bash
+SOLANA_RPC_URL=https://api.devnet.solana.com
+PROGRAM_ID=AKMoTiFexNvW3efoiwDcemdraDrnhzfBqTeTL21fVRB9
+CHALLENGE_ID=1
+SOLANA_OWNER_SECRET_KEY=[1,2,3,4,5,...]  # Array from service-wallet.json
+TREASURY_PUBKEY=YourTreasuryWalletPublicKey
+```
+
+### 1.5 Fund Service Wallet
+```bash
+# Get wallet address
+solana-keygen pubkey service-wallet.json
+
+# Fund with devnet SOL (for transaction fees)
+solana airdrop 2 <wallet-address> --url devnet
+```
+
+### 1.6 Start Wrapper
+```bash
+# Build and start
+npm run build
+npm start
+
+# Should output: "Server running on http://127.0.0.1:3001"
+```
