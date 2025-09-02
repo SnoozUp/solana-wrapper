@@ -243,18 +243,20 @@ Create wallet:
 ```bash
 solana-keygen new --outfile ~/.config/solana/backend-service.json
 cat ~/.config/solana/backend-service.json
+```
 
+<!-- PAGE BREAK -->
+<div style="page-break-before: always;"></div>
 
----
+## DEPLOY WRAPPER
 
+### 1.1 CLONE REPOSITORY
 
-## Deploy Wrapper
-
-### 1.1 Clone Repository
 ```bash
 git clone <your-repo-url>
 cd solanascfinal
 ```
+
 
 ### 1.2 Install Dependencies
 ```bash
