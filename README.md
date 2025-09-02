@@ -75,7 +75,17 @@ programs/
 
 ### Admin operations (need owner wallet)
 - `POST /api/initialize` - initialize the state PDA
+Create the challenge PDA and set first values.
+  Req: { "challengeId": "123", "fee": "100000000", "commission": 10 }
+  Res: { "signature": "5KJp7...", "state": "7xKs9..." }
+  
+  Errors: 400 bad input / 409 already exists
+
 - `POST /api/winners` - set winners list
+  Set or replace the winners for the current challenge.
+    Req: { "winners": ["9WzDXw...WWM", "2xNweL...a8i"] }
+    Res: { "signature": "3Hj8k..." }
+    Errors: 400 empty/invalid pubkeys
 - `POST /api/send-bonus-to-winners` - distribute bonuses to winners, take commission, close challenge
 - `POST /api/distribute` - alias for send-bonus-to-winners
 - `POST /api/refund-batch` - refund subscribers
