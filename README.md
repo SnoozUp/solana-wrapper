@@ -45,7 +45,7 @@ programs/
    cp .env.example .env
    ```
    
-   You need to set:
+   Need to set:
    - `SOLANA_RPC_URL` - solana RPC endpoint
    - `PROGRAM_ID` - smart contract program ID (set for devnet)
    - `CHALLENGE_ID` - challenge identifier
@@ -60,47 +60,136 @@ programs/
 
 ## Api Endpoints 
 
-### Read operations (no wallet needed)
+## 🔧 Admin (owner wallet)
 
-- `GET /api/state` - complete contract state (PDA, owners, subscribers, winners)
-- `GET /api/fee` - subscription fee in lamports
-- `GET /api/commission` - commission percentage
-- `GET /api/status` - contract status
-- `GET /api/challenge-id` - current challenge ID
-- `GET /api/winners` - winners list
-- `GET /api/events/:signature` - get events by transaction signature
-- `GET /api/operation fee` - operation counter
-- `GET /health` - health check (no /api prefix)
-- `GET /ready` - readiness check (no /api prefix)
-
-### Admin operations (need owner wallet)
-- `POST /api/initialize` - initialize the state PDA
-Create the challenge PDA and set first values.
-  Req: { "challengeId": "123", "fee": "100000000", "commission": 10 }
-  Res: { "signature": "5KJp7...", "state": "7xKs9..." }
-  
+- `POST /api/initialize` - initialize the state PDA  
+  *Create the challenge PDA and set first values.*  
+  Req: { "challengeId": "123", "fee": "100000000", "commission": 10 }  
+  Res: { "signature": "5KJp7...", "state": "7xKs9..." }  
   Errors: 400 bad input / 409 already exists
 
-- `POST /api/winners` - set winners list
-  Set or replace the winners for the current challenge.
-    Req: { "winners": ["9WzDXw...WWM", "2xNweL...a8i"] }
-    Res: { "signature": "3Hj8k..." }
-    Errors: 400 empty/invalid pubkeys
-- `POST /api/send-bonus-to-winners` - distribute bonuses to winners, take commission, close challenge
-- `POST /api/distribute` - alias for send-bonus-to-winners
-- `POST /api/refund-batch` - refund subscribers
-- `POST /api/refund` - alias for refund-batch
-- `POST /api/withdraw-funds` - withdraw SOL above rent to the owner
-- `POST /api/set-fee` - update subscription fee
-- `POST /api/set-commission` - update commission percentage
-- `POST /api/set-status` - update contract status
-- `POST /api/set-owner` - set new owner
-- `POST /api/remove-owner` - remove owner
-- `POST /api/cancel-subscription` - cancel user subscription
+- `POST /api/winners` - set winners list  
+  *Set or replace the winners for the current challenge.*  
+  Req: { "winners": ["9WzDXw...WWM", "2xNweL...a8i"] }  
+  Res: { "signature": "3Hj8k..." }  
+  Errors: 400 empty/invalid pubkeys
 
-### User operations
-- `POST /api/build/subscribe-tx` - build subscribe transaction for user to sign
-- `POST /api/subscribe` - returns 501 error, use build/subscribe-tx instead
+- `POST /api/send-bonus-to-winners` - distribute pot and close  
+  *Pay winners, send commission to treasury, mark status CLOSED.*  
+  Req: {}  
+  Res: { "signature": "8Nm2p..." }  
+  Errors: 404 winners not set / 500 insufficient funds
+
+- `POST /api/refund-batch` - refund subscribers  
+  *Return the fee to the specified subscribers and remove them from the list.*  
+  Req: { "subscribers": ["9WzDXw...WWM", "2xNweL...a8i"] }  
+  Res: { "signature": "4Kl9m..." }  
+  Errors: 400 empty subscribers / 404 subscriber not found
+
+- `POST /api/withdraw-funds` - withdraw surplus SOL  
+  *Withdraw any SOL above rent-exempt minimum to owner wallet.*  
+  Req: {}  
+  Res: { "signature": "6Pq3r..." }  
+  Errors: —
+
+- `POST /api/set-fee` - update fee  
+  *Set the subscription fee (lamports).*  
+  Req: { "fee": "200000000" }  
+  Res: { "signature": "7Rs4t..." }  
+  Errors: 400 invalid fee
+
+- `POST /api/set-commission` - update commission  
+  *Set commission percent (0–100).*  
+  Req: { "commissionPercentage": 15 }  
+  Res: { "signature": "8Tu5v..." }  
+  Errors: 400 out of range
+
+- `POST /api/set-owner` - change owner  
+  *Set a new primary owner pubkey.*  
+  Req: { "newOwner": "9WzDXw...WWM" }  
+  Res: { "signature": "9Wx6y..." }  
+  Errors: —
+
+- `POST /api/set-status` - update status  
+  *Force challenge status (0=pending,1=in-progress,2=closed,3=canceled).*  
+  Req: { "status": 1 }  
+  Res: { "signature": "1Az7b..." }  
+  Errors: —
+
+- `POST /api/cancel-subscription` - cancel & refund one user  
+  *Cancel a single subscriber and refund their fee.*  
+  Req: { "subscriber": "9WzDXw...WWM" }  
+  Res: { "signature": "2Bc8d..." }  
+  Errors: —
+
+---
+
+## 👤 User
+
+- `POST /api/build/subscribe-tx` - build unsigned subscribe tx  
+  *Build a transaction for the user to sign in their wallet.*  
+  Req: { "subscriber": "9WzDXw...WWM" }  
+  Res: { "txBase64": "AQAAAA...==", "message": "User must sign this transaction and submit via sendTransaction" }  
+  Errors: —
+
+- `POST /api/subscribe` - deprecated  
+  *Deprecated: returns 501, use /api/build/subscribe-tx.*  
+  Req: {}  
+  Res: { "code": "NOT_IMPLEMENTED", "message": "Use /api/build/subscribe-tx; user must sign" }  
+  Errors: —
+
+---
+
+## 📖 Read
+
+- `GET /api/state` - read full state  
+  *Return the complete PDA state for the current challenge.*  
+  Req: —  
+  Res: { "pda": "7xKs9BdX...", "version": 1, "bump": 254, "owner": "9WzDXw...WWM", "challengeId": "123", "fee": "100000000", "commission": 10, "status": 1, "opCounter": "5", "owners": ["9WzDXw...WWM"], "subscribers": ["2xNweL...a8i","3yOwfM...b9j"], "winnersList": ["2xNweL...a8i"], "subscribersCount": 2 }  
+  Errors: 404 state not found
+
+- `GET /api/fee` - read fee  
+  *Return current subscription fee (lamports).*  
+  Req: —  
+  Res: { "fee": "100000000" }  
+  Errors: —
+
+- `GET /api/commission` - read commission  
+  *Return commission percent.*  
+  Req: —  
+  Res: { "commission": 10 }  
+  Errors: —
+
+- `GET /api/status` - read status  
+  *Return challenge status code.*  
+  Req: —  
+  Res: { "status": 1 }  
+  Errors: —
+
+- `GET /api/challenge-id` - read challenge id  
+  *Return current challengeId.*  
+  Req: —  
+  Res: { "challengeId": "123" }  
+  Errors: —
+
+- `GET /api/winners` - read winners  
+  *Return winners list.*  
+  Req: —  
+  Res: { "winners": ["2xNweL...a8i","3yOwfM...b9j"] }  
+  Errors: —
+
+- `GET /api/op-counter` - read op counter  
+  *Return operation counter.*  
+  Req: —  
+  Res: { "opCounter": "5" }  
+  Errors: —
+
+- `GET /api/events/:signature` - read events by tx  
+  *Return emitted events for a given transaction signature.*  
+  Req: signature in path  
+  Res: { "signature": "5KJp7...", "events": [ { "name": "SubscriberAdded", "data": { "subscriber": "9WzDXw...WWM", "fee": "100000000" } } ] }  
+  Errors: —
+
 
 ## Testing with Backend
 
