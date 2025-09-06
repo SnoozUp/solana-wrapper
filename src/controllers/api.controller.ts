@@ -15,16 +15,19 @@ import {
   RemoveOwnerDto
 } from './dto/api.dto';
 
+@ApiTags('solana')
 @Controller('api')
 export class ApiController {
   constructor(private readonly sol: SolanaService) {}
 
   //subscribe() 
+  @ApiOperation({ summary: 'Subscribe to challenge (deprecated)', description: 'Use /api/build/subscribe instead' })
+  @ApiResponse({ status: 501, description: 'Not implemented - use build/subscribe' })
   @Post('subscribe')
   @HttpCode(501)
   subscribe() {
     throw new HttpException(
-      { code: 'NOT_IMPLEMENTED', message: 'Use /api/build/subscribe-tx; user must sign' },
+      { code: 'NOT_IMPLEMENTED', message: 'Use /api/build/subscribe; user must sign' },
       501
     );
   }
