@@ -1,6 +1,19 @@
 // api controller
 import { Controller, Get, Post, Body, HttpException, HttpCode, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { SolanaService } from '../solana/solana.service';
+import { 
+  InitializeDto, 
+  BuildSubscribeDto, 
+  WinnersDto, 
+  RefundBatchDto, 
+  SetFeeDto, 
+  SetCommissionDto, 
+  SetStatusDto, 
+  CancelSubscriptionDto,
+  SetOwnerDto,
+  RemoveOwnerDto
+} from './dto/api.dto';
 
 @Controller('api')
 export class ApiController {
