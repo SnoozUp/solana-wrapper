@@ -70,7 +70,8 @@ export class ApiController {
 
   
   // sendBonusToWinners()
-   
+  @ApiOperation({ summary: 'Distribute prizes to winners', description: 'Send prize pool to winners equally' })
+  @ApiResponse({ status: 200, description: 'Prizes distributed', schema: { type: 'object', properties: { signature: { type: 'string' }, winners: { type: 'array', items: { type: 'string' } } } } })
   @Post('send-bonus-to-winners')
   @HttpCode(200)
   sendBonusToWinners() {
@@ -78,6 +79,8 @@ export class ApiController {
   }
 
   //Back-compat alias for older clients 
+  @ApiOperation({ summary: 'Distribute prizes (alias)', description: 'Alias for send-bonus-to-winners endpoint' })
+  @ApiResponse({ status: 200, description: 'Prizes distributed' })
   @Post('distribute')
   @HttpCode(200)
   distributeAlias() {
@@ -87,10 +90,12 @@ export class ApiController {
   
    //refundBatch
    //Remaining accounts must match the subscribers array order
-   
+  @ApiOperation({ summary: 'Refund subscribers', description: 'Return entry fees to subscribers' })
+  @ApiResponse({ status: 200, description: 'Refunds processed', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
+  @ApiResponse({ status: 400, description: 'Invalid subscribers array or empty array' })
   @Post('refund-batch')
   @HttpCode(200)
-  refundBatch(@Body() body: { subscribers: string[] }) {
+  refundBatch(@Body() body: RefundBatchDto) {
     if (!body.subscribers || !Array.isArray(body.subscribers) || body.subscribers.length === 0) {
       throw new HttpException(
         { code: 'INVALID_INPUT', message: 'subscribers array required and must not be empty' },
