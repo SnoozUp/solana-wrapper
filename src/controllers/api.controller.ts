@@ -106,13 +106,17 @@ export class ApiController {
   }
 
   //Back-compat alias 
+  @ApiOperation({ summary: 'Refund subscribers (alias)', description: 'Alternative refund endpoint' })
+  @ApiResponse({ status: 200, description: 'Refunds processed' })
   @Post('refund')
   @HttpCode(200)
-  refundAlias(@Body() body: { subscribers: string[] }) {
+  refundAlias(@Body() body: RefundBatchDto) {
     return this.sol.refundBatch(body);
   }
 
   // withdrawFunds() 
+  @ApiOperation({ summary: 'Withdraw remaining funds', description: 'Transfer remaining balance to treasury' })
+  @ApiResponse({ status: 200, description: 'Funds withdrawn', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
   @Post('withdraw-funds')
   @HttpCode(200)
   withdrawFunds() {
@@ -120,106 +124,120 @@ export class ApiController {
   }
 
   // setFee
+  @ApiOperation({ summary: 'Update entry fee', description: 'Set new entry fee in lamports' })
+  @ApiResponse({ status: 200, description: 'Fee updated', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
   @Post('set-fee')
   @HttpCode(200)
-  setFee(@Body() body: { fee?: string | number; newFee?: string | number }) {
-    const fee = body.fee ?? body.newFee;
-    if (fee === undefined) {
-      throw new HttpException({ code: 'BAD_INPUT', message: 'Missing fee/newFee' }, 400);
-    }
-    return this.sol.setFee({ fee });
+  setFee(@Body() body: SetFeeDto) {
+    return this.sol.setFee({ fee: body.fee });
   }
 
   // setCommision
+  @ApiOperation({ summary: 'Update commission rate', description: 'Set commission percentage (0-100)' })
+  @ApiResponse({ status: 200, description: 'Commission updated', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
+  @ApiResponse({ status: 400, description: 'Commission percentage must be between 0-100' })
   @Post('set-commission')
   @HttpCode(200)
-  setCommision(@Body() body: { commissionPercentage: string | number }) {
-    const n = Number(body.commissionPercentage);
-    if (!Number.isFinite(n) || n < 0 || n > 100) {
+  setCommision(@Body() body: SetCommissionDto) {
+    if (body.commissionPercentage < 0 || body.commissionPercentage > 100) {
       throw new HttpException({ code: 'BAD_INPUT', message: 'commissionPercentage must be 0..100' }, 400);
     }
-    return this.sol.setCommision({ commissionPercentage: n });
+    return this.sol.setCommision({ commissionPercentage: body.commissionPercentage });
   }
 
   // setOwner
+  @ApiOperation({ summary: 'Add allowed owner (whitelist)', description: 'Add wallet to owners whitelist' })
+  @ApiResponse({ status: 200, description: 'Owner added', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
+  @ApiResponse({ status: 400, description: 'Invalid input/ too many owners' })
   @Post('set-owner')
   @HttpCode(200)
-  setOwner(@Body() body: { newOwner: string }) {
-    if (!body.newOwner || typeof body.newOwner !== 'string') {
-      throw new HttpException(
-        { code: 'INVALID_INPUT', message: 'newOwner string required' },
-        400
-      );
-    }
+  setOwner(@Body() body: SetOwnerDto) {
     return this.sol.setOwner(body);
   }
 
+  @ApiOperation({ summary: 'Get transaction events', description: 'Retrieve emitted events for a given transaction signature' })
+  @ApiResponse({ status: 200, description: 'Events retrieved' })
+  @ApiParam({ name: 'signature', description: 'Transaction signature to get events for' })
   @Get('events/:signature')
   events(@Param('signature') signature: string) {
     return this.sol.events(signature);
   }
 
   // removeOwner
+  @ApiOperation({ summary: 'Remove allowed owner', description: 'Remove wallet from owners whitelist' })
+  @ApiResponse({ status: 200, description: 'Owner removed', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
   @Post('remove-owner')
   @HttpCode(200)
-  removeOwner(@Body() body: { user: string }) {
-    if (!body.user || typeof body.user !== 'string') {
-      throw new HttpException(
-        { code: 'INVALID_INPUT', message: 'user string required' },
-        400
-      );
-    }
+  removeOwner(@Body() body: RemoveOwnerDto) {
     return this.sol.removeOwner(body);
   }
 
   // setStatus
+  @ApiOperation({ summary: 'Update challenge status', description: 'Change status: 0=PENDING 1=IN_PROGRESS 2=CLOSED 3=CANCELED' })
+  @ApiResponse({ status: 200, description: 'Status updated', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
   @Post('set-status')
   @HttpCode(200)
-  setStatus(@Body() body: { status: number }) {
+  setStatus(@Body() body: SetStatusDto) {
     return this.sol.setStatus(body);
   }
 
   // cancelSubscription
+  @ApiOperation({ summary: 'Cancel single subscription', description: 'Cancel subscriber and refund fee' })
+  @ApiResponse({ status: 200, description: 'Subscription canceled', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
   @Post('cancel-subscription')
   @HttpCode(200)
-  cancelSubscription(@Body() body: { subscriber: string }) {
+  cancelSubscription(@Body() body: CancelSubscriptionDto) {
     return this.sol.cancelSubscription(body);
   }
 
 
   // GET /api/state 
+  @ApiOperation({ summary: 'Get full challenge state', description: 'Returns complete challenge info: subscribers winners and settings' })
+  @ApiResponse({ status: 200, description: 'Challenge state retrieved' })
   @Get('state')
   getState() {
     return this.sol.getState();
   }
 
+  @ApiOperation({ summary: 'Get entry fee', description: 'Returns current entry fee in lamports' })
+  @ApiResponse({ status: 200, description: 'Fee retrieved', schema: { type: 'object', properties: { fee: { type: 'string' } } } })
   @Get('fee')
   getFee() {
     return this.sol.getFee();
   }
 
+  @ApiOperation({ summary: 'Get commission rate', description: 'Returns commission percentage (0-100)' })
+  @ApiResponse({ status: 200, description: 'Commission retrieved', schema: { type: 'object', properties: { commission: { type: 'number' } } } })
   @Get('commission')
   getCommission() {
     return this.sol.getCommission();
   }
 
+  @ApiOperation({ summary: 'Get challenge status', description: 'Returns status: 0=PENDING 1=IN_PROGRESS 2=CLOSED 3=CANCELED' })
+  @ApiResponse({ status: 200, description: 'Status retrieved', schema: { type: 'object', properties: { status: { type: 'number' } } } })
   @Get('status')
   getStatus() {
     return this.sol.getStatus();
   }
 
+  @ApiOperation({ summary: 'Get challenge events', description: 'Returns challenge events and transactions' })
+  @ApiResponse({ status: 200, description: 'Challenge ID retrieved', schema: { type: 'object', properties: { challengeId: { type: 'string' } } } })
   @Get('challenge-id')
   getChallengeId() {
     return this.sol.getChallengeId();
   }
 
+  @ApiOperation({ summary: 'Get winners list', description: 'Returns winner wallet addresses' })
+  @ApiResponse({ status: 200, description: 'Winners retrieved', schema: { type: 'object', properties: { winners: { type: 'array', items: { type: 'string' } } } } })
   @Get('winners')
   async getWinners() {
     const s = await this.sol.getState();
     return { winners: s.winnersList };
   }
 
-
+  @ApiOperation({ summary: 'Get operation counter', description: 'Returns number of admin operations performed' })
+  @ApiResponse({ status: 200, description: 'Operation counter retrieved', schema: { type: 'object', properties: { opCounter: { type: 'string' } } } })
   @Get('op-counter')
   getOperationFee() {
     return this.sol.getOperationFee();
