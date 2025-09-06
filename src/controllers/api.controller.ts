@@ -32,23 +32,30 @@ export class ApiController {
     );
   }
 
+  @ApiOperation({ summary: 'Build unsigned subscription transaction', description: 'Creates unsigned transaction for user to sign and subscribe' })
+  @ApiResponse({ status: 200, description: 'Unsigned transaction returned', schema: { type: 'object', properties: { txBase64: { type: 'string' } } } })
   @Post('build/subscribe-tx')
   @HttpCode(200)
-  buildSubscribeTx(@Body() body: { subscriber: string }) {
+  buildSubscribeTx(@Body() body: BuildSubscribeDto) {
     return this.sol.buildSubscribeTx(body);
   }
 
   // initialize
+  @ApiOperation({ summary: 'Initialize new challenge', description: 'Create new challenge with fee and settings' })
+  @ApiResponse({ status: 200, description: 'Challenge initialized', schema: { type: 'object', properties: { signature: { type: 'string' }, state: { type: 'string' } } } })
   @Post('initialize')
   @HttpCode(200)
-  initialize(@Body() body: { challengeId: string | number | bigint; fee: string | number | bigint; commission: string | number | bigint }) {
+  initialize(@Body() body: InitializeDto) {
     return this.sol.initialize(body);
   }
 
   // setWinnersList 
+  @ApiOperation({ summary: 'Set challenge winners', description: 'Store winner wallet addresses' })
+  @ApiResponse({ status: 200, description: 'Winners set', schema: { type: 'object', properties: { signature: { type: 'string' } } } })
+  @ApiResponse({ status: 400, description: 'Invalid winners array or invalid wallet addresses' })
   @Post('winners')
   @HttpCode(200)
-  setWinnersList(@Body() body: { winners: string[] }) {
+  setWinnersList(@Body() body: WinnersDto) {
     if (!Array.isArray(body.winners) || body.winners.length === 0) {
       throw new HttpException({ code: 'BAD_INPUT', message: 'winners must be a non-empty array' }, 400);
     }
