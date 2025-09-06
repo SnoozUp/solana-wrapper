@@ -1,5 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
@@ -44,6 +46,23 @@ async function bootstrap() {
     app.enableCors({ origin: origins });
   }
 
+  // Enable global validation
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // Setup Swagger documentation
+  const config = new DocumentBuilder()
+    .setTitle('Solana Wrapper API')
+    .setDescription('REST endpoints for Solana subscription platform')
+    .setVersion('1.0.0')
+    .addTag('solana', 'Solana blockchain operations')
+    .addTag('admin', 'Admin-only operations')
+    .addTag('user', 'User operations')
+    .addTag('read', 'Read-only operations')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
   app.enableShutdownHooks();
 
   // Start server on localhost
@@ -51,5 +70,6 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 3001);
   await app.listen(port, host);
   console.log(`Server running on http://${host}:${port}`);
+  console.log(`Swagger docs available at http://${host}:${port}/docs`);
 }
 bootstrap();
