@@ -15,7 +15,7 @@ pub struct Initialize<'info> {
     )]
     pub state: Account<'info, State>,
 
-    // The person creating the challenge (must sign transaction)
+    // The person creating the challenge 
     #[account(mut)]
     pub owner: Signer<'info>,
 
@@ -83,25 +83,6 @@ pub struct RefundBatch<'info> {
     pub system_program: Program<'info, System>,
 }
 
-// Account setup for owner taking out leftover money
-#[derive(Accounts)]
-pub struct WithdrawFunds<'info> {
-    // Find challenge state account
-    #[account(
-        mut,                    // We will modify this account
-        seeds = [b"state", state.owner.as_ref(), &state.challenge_id.to_le_bytes()], // Find by owner + challenge ID
-        bump = state.bump,      // Use stored bump for security
-        constraint = owner.key() == state.owner @ crate::internal::ErrorCode::OnlyOwner // Only owner can withdraw
-    )]
-    pub state: Account<'info, State>,
-
-    // Challenge owner (receives the money)
-    #[account(mut)]
-    pub owner: Signer<'info>,
-
-    // Solana system program (needed for SOL transfers)
-    pub system_program: Program<'info, System>,
-}
 
 // Account setup for functions only the owner can use
 #[derive(Accounts)]
@@ -125,7 +106,7 @@ pub struct UpdateFee<'info> {
     // Find challenge state account
     #[account(
         mut,                    // We will modify this account
-        seeds = [b"state", state.owner.as_ref(), &state.challenge_id.to_le_bytes()], // Find by owner + challenge ID
+        seeds = [b"state", state.owner.as_ref(), &state.challenge_id.to_le_bytes()], // Find it by owner + challenge ID
         bump = state.bump,      // Use stored bump for security
         constraint = owner.key() == state.owner @ crate::internal::ErrorCode::OnlyOwner // Only owner can change fee
     )]
@@ -146,7 +127,7 @@ pub struct UpdateCommission<'info> {
     )]
     pub state: Account<'info, State>,
 
-    // Only the challenge owner can change commission
+    // Only the challenge owner can change the commission
     #[account(constraint = owner.key() == state.owner @ crate::internal::ErrorCode::OnlyOwner)]
     pub owner: Signer<'info>,
 }
