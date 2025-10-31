@@ -35,62 +35,109 @@ programs/
 
 ## Setup
 
-1. Install stuff:
-   ```bash
-   npm install
-   ```
+### 0) Install Prerequisites (once)
 
-2. Copy the env file:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Need to set:
-   - `SOLANA_RPC_URL` - solana RPC endpoint
-   - `PROGRAM_ID` - smart contract program ID (set for devnet)
-   - `CHALLENGE_ID` - challenge identifier
-   - `SOLANA_OWNER_SECRET_KEY` - service wallet secret key array
-   - `TREASURY_PUBKEY` - treasury wallet address for commission
+- **Node 18+** - Check: `node -v`, `npm -v`
+- **Solana CLI** - Windows installer - Check: `solana --version`
+- **Anchor** (if deploying/upgrading the program) - Check: `anchor --version`
+- **Wallet keypairs** per network:
+  - `.\secrets\owner-devnet.json`
+  - `.\secrets\owner-mainnet.json`
+  
+  Both must be 64-number JSON format (ed25519 secret).
 
-3. Run it:
-   ```bash
-   npm run build
-   npm start
-   ```
+### 1) Pick Cluster + Set Solana CLI
+
+**For Devnet:**
+```bash
+solana config set --url https://api.devnet.solana.com
+solana config set --keypair $PWD\secrets\owner-devnet.json
+solana balance
+# If balance ~0, fund it:
+solana airdrop 2
+```
+
+**For Mainnet:**
+```bash
+solana config set --url https://api.mainnet-beta.solana.com
+solana config set --keypair $PWD\secrets\owner-mainnet.json
+solana balance
+# (No airdrop on mainnet; fund from an exchange/wallet)
+```
+
+### 2) Program IDs (one per cluster)
+
+Use the Program ID deployed for each network:
+- **DEVNET PROGRAM_ID** = devnet PID
+- **MAINNET PROGRAM_ID** = mainnet PID
+
+Check they exist:
+```bash
+solana program show <DEVNET_PID> --url https://api.devnet.solana.com
+solana program show <MAINNET_PID> --url https://api.mainnet-beta.solana.com
+```
+
+Keep the same PID. Upgrade authority must match the wallet you set in solana config.
+
+### 3) Environment Files (we can have two files)
+
+**`.env.mainnet` (example):**
+```env
+NODE_ENV=production
+HOST=0.0.0.0
+PORT=3001
+
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+PROGRAM_ID=Mainnet ProgramID
+TREASURY_PUBKEY= MAINNET TREASURY
+STATE_MAX_SIZE=3793
+PRIORITY_MICROLAMPORTS=0
+
+ADMIN_TOKEN=prod-admin-token
+READ_TTL_MS=2000
+BLOCKHASH_TTL_MS=2000
+RPC_MAX_CONCURRENCY=6
+BUILD_MAX_CONCURRENCY=4
+
+SOLANA_OWNER_SECRET_KEY_FILE=.\secrets\owner-mainnet.json
+CORS_ORIGIN=*
+```
+
+### 4) Install + Run Wrapper (devnet or mainnet)
+
+From the project root in PowerShell:
+
+```bash
+npm install
+npm run build
+
+# For devnet
+npm start
+
+Open Swagger: http://localhost:3001/docs
 
 ## Api Endpoints 
 
-## 🔧 Admin (owner wallet)
+## Admin (owner wallet)
 
-- `POST /api/initialize` - initialize the state PDA  
+- `POST /api/initialize/ChallengeID` - initialize the state PDA  
   *Create the challenge PDA and set first values.*  
   Req: { "challengeId": "123", "fee": "100000000", "commission": 10 }  
   Res: { "signature": "5KJp7...", "state": "7xKs9..." }  
-  Errors: 400 bad input / 409 already exists
+  
 
-- `POST /api/winners` - set winners list  
+- `POST /api/winners/ChallengeID` - set winners list  
   *Set or replace the winners for the current challenge.*  
   Req: { "winners": ["9WzDXw...WWM", "2xNweL...a8i"] }  
   Res: { "signature": "3Hj8k..." }  
   Errors: 400 empty/invalid pubkeys
 
-- `POST /api/send-bonus-to-winners` - distribute pot and close  
+- `POST /api/send-bonus-to-winner/ChallengeID` - distribute pot and close  
   *Pay winners, send commission to treasury, mark status CLOSED.*  
   Req: {}  
   Res: { "signature": "8Nm2p..." }  
   Errors: 404 winners not set / 500 insufficient funds
 
-- `POST /api/refund-batch` - refund subscribers  
-  *Return the fee to the specified subscribers and remove them from the list.*  
-  Req: { "subscribers": ["9WzDXw...WWM", "2xNweL...a8i"] }  
-  Res: { "signature": "4Kl9m..." }  
-  Errors: 400 empty subscribers / 404 subscriber not found
-
-- `POST /api/withdraw-funds` - withdraw surplus SOL  
-  *Withdraw any SOL above rent-exempt minimum to owner wallet.*  
-  Req: {}  
-  Res: { "signature": "6Pq3r..." }  
-  Errors: —
 
 - `POST /api/set-fee` - update fee  
   *Set the subscription fee (lamports).*  
@@ -98,25 +145,8 @@ programs/
   Res: { "signature": "7Rs4t..." }  
   Errors: 400 invalid fee
 
-- `POST /api/set-commission` - update commission  
-  *Set commission percent (0–100).*  
-  Req: { "commissionPercentage": 15 }  
-  Res: { "signature": "8Tu5v..." }  
-  Errors: 400 out of range
 
-- `POST /api/set-owner` - change owner  
-  *Set a new primary owner pubkey.*  
-  Req: { "newOwner": "9WzDXw...WWM" }  
-  Res: { "signature": "9Wx6y..." }  
-  Errors: —
-
-- `POST /api/set-status` - update status  
-  *Force challenge status (0=pending,1=in-progress,2=closed,3=canceled).*  
-  Req: { "status": 1 }  
-  Res: { "signature": "1Az7b..." }  
-  Errors: —
-
-- `POST /api/cancel-subscription` - cancel & refund one user  
+- `POST /api/cancel-subscription/ChallengeID` - cancel & refund one user  
   *Cancel a single subscriber and refund their fee.*  
   Req: { "subscriber": "9WzDXw...WWM" }  
   Res: { "signature": "2Bc8d..." }  
@@ -191,119 +221,28 @@ programs/
   Errors: —
 
 
-## Testing with Backend
+- `At runtime:`
 
-1. Start the wrapper on a port:
-   ```bash
-   PORT=3001 npm start
-   ```
+user wants in → wrapper builds subscribe ix (payer = user), wallet signs, program pulls fee into PDA + appends user
 
-2. Test reading (no wallet needed):
-   ```bash
-   curl http://localhost:3001/api/state
-   curl http://localhost:3001/api/fee
-   ```
+admin closes → wrapper calls set_winners_list, then send_bonus_to_winners, program splits available lamports, pays winners + treasury, flips paid, locks status to CLOSED
 
-3. Test user subscription flow:
-   ```bash
-   #  S1: Backend calls build/subscribe-tx
-   curl -X POST http://localhost:3001/api/build/subscribe-tx \
-     -H "Content-Type: application/json" \
-     -d '{"subscriber": "USER_WALLET_PUBKEY"}'
-   
-   #  S2: Client signs the returned txBase64 with wallet and submits via sendTransaction
-   #  S3: Check subscriber was added
-   curl http://localhost:3001/api/state | jq '.subscribers'
-   ```
-
-4. Test admin operations:
-   ```bash
-   curl -X POST http://localhost:3001/api/send-bonus-to-winners
-   curl http://localhost:3001/api/set-fee \
-     -H "Content-Type: application/json" \
-     -d '{"fee": "100000000"}'
-   ```
-
-5. Check operation counter:
-   ```bash
-   curl http://localhost:3001/api/op-counter
-   ```
-
-## Backend Setup
-
-```bash
-SOLANA_RPC_URL=https://api.devnet.solana.com
-PROGRAM_ID=AKMoTiFexNvW3efoiwDcemdraDrnhzfBqTeTL21fVRB9
-CHALLENGE_ID=1
-SOLANA_OWNER_SECRET_KEY=
-TREASURY_PUBKEY=
-```
-
-Create wallet:
-```bash
-solana-keygen new --outfile ~/.config/solana/backend-service.json
-cat ~/.config/solana/backend-service.json
-```
-
-<!-- PAGE BREAK -->
-<div style="page-break-before: always;"></div>
-
-## DEPLOY WRAPPER
-
-### 1.1 CLONE REPOSITORY
-
-```bash
-git clone <your-repo-url>
-cd solanascfinal
-```
+refunds path is there too (refund_batch) with remaining_accounts alignment 
 
 
-### 1.2 Install Dependencies
-```bash
-npm install
-```
 
-### 1.3 Create Service Wallet
-```bash
-# Generate new keypair for the wrapper service
-solana-keygen new --outfile service-wallet.json
+- `keep these the same during upgrades:`
 
-# View the secret key array
-cat service-wallet.json
-```
+RPC/cluster (devnet with devnet, mainnet with mainnet)
 
-### 1.4 Configure Environment
-```bash
-# Copy environment template
-cp .env.example .env
+Program ID (upgrade the same one)
 
-# Edit .env with your values:
-nano .env
-```
+declare_id!(...) in Rust, the Anchor.toml mapping, and wrapper .env PROGRAM_ID (all aligned)
 
-Required values in `.env`:
-```bash
-SOLANA_RPC_URL=https://api.devnet.solana.com
-PROGRAM_ID=AKMoTiFexNvW3efoiwDcemdraDrnhzfBqTeTL21fVRB9
-CHALLENGE_ID=1
-SOLANA_OWNER_SECRET_KEY=[1,2,3,4,5,...]  # Array from service-wallet.json
-TREASURY_PUBKEY=YourTreasuryWalletPublicKey
-```
+PDA seeds ("state", owner, challengeId_le)
 
-### 1.5 Fund Service Wallet
-```bash
-# Get wallet address
-solana-keygen pubkey service-wallet.json
+STATE_MAX_SIZE=3793 in wrapper env matching on-chain layout size
 
-# Fund with devnet SOL (for transaction fees)
-solana airdrop 2 <wallet-address> --url devnet
-```
+CHALLENGE_ID parity: wrapper env CHALLENGE_ID == body.challengeId on initialize (wrapper enforces it)
 
-### 1.6 Start Wrapper
-```bash
-# Build and start
-npm run build
-npm start
-
-# Should output: "Server running on http://127.0.0.1:3001"
-```
+we don’t redeploy a new program for every challenge...the program is one thing with one Program ID, the data for each challenge lives in its own PDA account. seeds are "state" + ownerPubkey + challengeId(le).
