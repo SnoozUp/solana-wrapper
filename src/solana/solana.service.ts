@@ -1,5 +1,5 @@
 // src/solana/solana.service.ts
-// Import all the tools we need for Solana blockchain
+// Import all the tools we need for the Solana blockchain
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { Connection, PublicKey, Keypair, TransactionInstruction, TransactionMessage, VersionedTransaction, AccountMeta, SystemProgram, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
 import BN from 'bn.js';
