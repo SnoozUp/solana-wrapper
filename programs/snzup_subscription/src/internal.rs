@@ -42,6 +42,8 @@ pub struct State {
     pub commission: u8,            // 1  (0..=100)
     pub status: u8,                // 1  (0=PENDING,1=IN_PROGRESS,2=CLOSED,3=CANCELED)
     pub owner: Pubkey,             // 32
+    pub treasury: Pubkey,          // 32 (pinned payout target)
+    pub paid: bool,                // 1  (once true, distribution cannot run again)
     pub op_counter: u64,           // 8  (operation counter for parity with Solidity)
     pub owners: Vec<Pubkey>,       // 4 + N*32
     pub subscribers: Vec<Pubkey>,  // 4 + M*32
@@ -64,6 +66,8 @@ impl State {
         1 + // commission
         1 + // status
         32 + // owner
+        32 + // treasury
+        1 + // paid
         8 + // op_counter
         (4 + Self::MAX_OWNERS * 32) +
         (4 + Self::MAX_SUBSCRIBERS * 32) +
@@ -119,10 +123,6 @@ pub enum ErrorCode {
     InvalidSubscriberAddress,
     #[msg("Transfer to subscriber failed")]
     TransferToSubscriberFailed,
-    #[msg("No funds available")]
-    NoUsdcAvailable,
-    #[msg("Funds transfer failed")]
-    UsdcTransferFailed,
 
     // 6400–6499: Misc
     #[msg("Invalid commission rate")]
@@ -139,10 +139,10 @@ pub enum ErrorCode {
     AlreadyMigrated,
     #[msg("Invalid input")]
     InvalidInput,
-    #[msg("Missing winner ATA")]
-    MissingWinnerAta,         // check remaining_accounts length
-    #[msg("Missing subscriber ATA")]
-    MissingSubscriberAta,    
+    #[msg("Missing winner account")]
+    MissingWinnerAccount,         // check remaining_accounts length
+    #[msg("Missing subscriber account")]
+    MissingSubscriberAccount,    
     #[msg("No pending rotation")]
     NoPendingRotation,
     #[msg("Not pending owner")]
@@ -159,6 +159,8 @@ pub enum ErrorCode {
     MaxSubscribersReached,
     #[msg("Already subscribed")]
     AlreadySubscribed,
+    #[msg("Lamport arithmetic overflow/underflow")]
+    LamportMathError,
 }
 
 impl ErrorCode {
